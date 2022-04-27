@@ -12,6 +12,7 @@ import {
 import Head from 'next/head';
 import React from 'react';
 import NextLink from 'next/link';
+import classes from '../utils/classes';
 
 interface Props {
   title?: string;
@@ -21,6 +22,13 @@ interface Props {
 
 const Layout = ({ title, description, children }: Props) => {
   const theme = createTheme({
+    components: {
+      MuiLink: {
+        defaultProps: {
+          underline: 'none',
+        },
+      },
+    },
     typography: {
       h1: {
         fontSize: '1.6rem',
@@ -52,17 +60,19 @@ const Layout = ({ title, description, children }: Props) => {
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppBar position='static'>
-          <Toolbar>
+        <AppBar position='static' sx={classes.appbar}>
+          <Toolbar sx={classes.toolbar}>
             <NextLink href='/' passHref>
               <Link>
-                <Typography>Amazon</Typography>
+                <Typography sx={classes.brand}>Amazon</Typography>
               </Link>
             </NextLink>
           </Toolbar>
         </AppBar>
-        <Container component='main'>{children}</Container>
-        <Box component='footer'>
+        <Container component='main' sx={classes.main}>
+          {children}
+        </Container>
+        <Box component='footer' sx={classes.footer}>
           <Typography>All rights reserved. Sanity Amazon Clone</Typography>
         </Box>
       </ThemeProvider>
