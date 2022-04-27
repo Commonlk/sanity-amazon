@@ -23,8 +23,10 @@ import { urlFor, urlForThumbnail } from '../../utils/image';
 import { Store } from '../../utils/store';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/router';
 
 const ProductScreen = (props: { slug: string }) => {
+  const router = useRouter();
   const { slug } = props;
   const {
     state: { cart },
@@ -61,7 +63,7 @@ const ProductScreen = (props: { slug: string }) => {
   }, [setState, slug, state]);
 
   const addToCartHandler = async () => {
-    const existItem = cart.cartItems.find(x => x._id === product?._id);
+    const existItem = cart.cartItems.find(x => x._key === product?._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
     const { data }: { data: IProduct } = await axios.get(
       `/api/products/${product?._id}`
@@ -88,6 +90,8 @@ const ProductScreen = (props: { slug: string }) => {
     enqueueSnackbar(`${product?.name} added to the cart`, {
       variant: 'success',
     });
+
+    router.push('/cart');
   };
 
   return (
@@ -160,7 +164,6 @@ const ProductScreen = (props: { slug: string }) => {
                       </Grid>
                       <Grid item xs={6}>
                         <Typography>
-                          $
                           {product!.countInStock > 0
                             ? 'In stock'
                             : 'Unavailable'}

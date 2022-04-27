@@ -26,7 +26,7 @@ const ProductItem = ({ product }: Props) => {
             image={urlForThumbnail(product.image)}
             title={product.name}
           />
-          <CardContent sx={{ minHeight: 120 }}>
+          <CardContent sx={{ minHeight: 150 }}>
             <Typography>{product.name}</Typography>
             <Typography>
               <Rating value={product?.rating} readOnly />
