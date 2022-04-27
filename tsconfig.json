@@ -20,7 +20,8 @@
     "**/*.ts",
     "**/*.tsx",
     "pages/_document.tsx",
-    "pages/_document.tsx"
+    "pages/_document.tsx",
+    "./node_modules/@sanity/base/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
