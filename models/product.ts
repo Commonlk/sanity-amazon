@@ -1,10 +1,11 @@
 export default interface IProduct {
+  _id: string;
   title: string;
   name: string;
   price: number;
   image: string;
   description: string;
-  slug: string;
+  slug: { current: string };
   brand: string;
   category: string;
   rating: number;

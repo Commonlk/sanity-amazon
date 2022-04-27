@@ -13,16 +13,26 @@ import {
   Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import IProduct from '../../models/product';
 import client from '../../utils/client';
 import classes from '../../utils/classes';
 import Image from 'next/image';
-import { urlFor } from '../../utils/image';
+import { urlFor, urlForThumbnail } from '../../utils/image';
+import { Store } from '../../utils/store';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
 
 const ProductScreen = (props: { slug: string }) => {
   const { slug } = props;
+  const {
+    state: { cart },
+    dispatch,
+  } = useContext(Store);
+
+  const { enqueueSnackbar } = useSnackbar();
+
   const [state, setState] = useState<{
     product: IProduct | null;
     loading: boolean;
@@ -50,6 +60,36 @@ const ProductScreen = (props: { slug: string }) => {
     fetchData();
   }, [setState, slug, state]);
 
+  const addToCartHandler = async () => {
+    const existItem = cart.cartItems.find(x => x._id === product?._id);
+    const quantity = existItem ? existItem.quantity + 1 : 1;
+    const { data }: { data: IProduct } = await axios.get(
+      `/api/products/${product?._id}`
+    );
+
+    if (data.countInStock < quantity) {
+      enqueueSnackbar('Sorry. Product is out of stock', { variant: 'error' });
+      return;
+    }
+
+    dispatch({
+      type: 'CART_ADD_ITEM',
+      payload: {
+        _key: product?._id,
+        name: product?.name,
+        countInStock: product?.countInStock,
+        slug: product?.slug.current,
+        price: product?.price,
+        image: urlForThumbnail(product?.image),
+        quantity,
+      },
+    });
+
+    enqueueSnackbar(`${product?.name} added to the cart`, {
+      variant: 'success',
+    });
+  };
+
   return (
     <Layout title={product?.title}>
       {loading ? (
@@ -75,7 +115,7 @@ const ProductScreen = (props: { slug: string }) => {
                 height={340}
               />
             </Grid>
-            <Grid md={3} xs={12}>
+            <Grid item md={3} xs={12}>
               <List>
                 <ListItem>
                   <Typography component='h1' variant='h1'>
@@ -129,7 +169,11 @@ const ProductScreen = (props: { slug: string }) => {
                     </Grid>
                   </ListItem>
                   <ListItem>
-                    <Button fullWidth variant='contained'>
+                    <Button
+                      onClick={addToCartHandler}
+                      fullWidth
+                      variant='contained'
+                    >
                       Add to cart
                     </Button>
                   </ListItem>

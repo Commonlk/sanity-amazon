@@ -43,7 +43,7 @@ const Home: NextPage = () => {
         ) : (
           <Grid container spacing={3}>
             {products!.map(product => (
-              <Grid item md={4} key={product.slug}>
+              <Grid item md={4} key={product.slug.current}>
                 <ProductItem product={product} />
               </Grid>
             ))}
