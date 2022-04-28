@@ -1,3 +1,10 @@
+import NextLink from 'next/link';
+import Layout from '../components/Layout';
+import Image from 'next/image';
+import ICartItem from '../models/cartItem';
+import IProduct from '../models/product';
+import dynamic from 'next/dynamic';
+import axios from 'axios';
 import {
   Button,
   Card,
@@ -17,17 +24,12 @@ import {
 } from '@mui/material';
 import { Box } from '@mui/system';
 import { useContext } from 'react';
-import Layout from '../components/Layout';
 import { Store } from '../utils/store';
-import NextLink from 'next/link';
-import Image from 'next/image';
-import ICartItem from '../models/cartItem';
-import dynamic from 'next/dynamic';
-import axios from 'axios';
 import { useSnackbar } from 'notistack';
-import IProduct from '../models/product';
+import { useRouter } from 'next/router';
 
 const CartScreen = () => {
+  const router = useRouter();
   const {
     state: {
       cart: { cartItems },
@@ -169,7 +171,12 @@ const CartScreen = () => {
                   </Typography>
                 </ListItem>
                 <ListItem>
-                  <Button fullWidth color='primary' variant='contained'>
+                  <Button
+                    onClick={() => router.push('/shipping')}
+                    fullWidth
+                    color='primary'
+                    variant='contained'
+                  >
                     Checkout
                   </Button>
                 </ListItem>
