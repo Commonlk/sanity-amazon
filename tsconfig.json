@@ -20,8 +20,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "pages/_document.tsx",
-    "pages/_document.tsx",
+    "pages/_document.jsx",
+    "pages/_document.jsx",
     "./node_modules/@sanity/base/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
