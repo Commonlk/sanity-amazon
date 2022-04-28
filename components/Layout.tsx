@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Badge,
   Box,
   Container,
   createTheme,
@@ -25,7 +26,7 @@ interface Props {
 
 const Layout = ({ title, description, children }: Props) => {
   const { state, dispatch } = useContext(Store);
-  const { darkMode } = state;
+  const { darkMode, cart } = state;
 
   const theme = createTheme({
     components: {
@@ -83,6 +84,22 @@ const Layout = ({ title, description, children }: Props) => {
             </Box>
             <Box>
               <Switch checked={darkMode} onChange={darkModeChangeHandler} />
+              <NextLink href='cart' passHref>
+                <Link>
+                  <Typography component='span'>
+                    {cart.cartItems.length > 0 ? (
+                      <Badge
+                        color='secondary'
+                        badgeContent={cart.cartItems.length}
+                      >
+                        Cart
+                      </Badge>
+                    ) : (
+                      'Cart'
+                    )}
+                  </Typography>
+                </Link>
+              </NextLink>
             </Box>
           </Toolbar>
         </AppBar>

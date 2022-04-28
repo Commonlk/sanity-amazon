@@ -11,12 +11,14 @@ import {
 import React from 'react';
 import NextLink from 'next/link';
 import { urlForThumbnail } from '../utils/image';
+import IProduct from '../models/product';
 
 interface Props {
-  product: any;
+  product: IProduct;
+  addToCartHandler: (product: IProduct) => void;
 }
 
-const ProductItem = ({ product }: Props) => {
+const ProductItem = ({ product, addToCartHandler }: Props) => {
   return (
     <Card sx={{ minHeight: 400 }}>
       <NextLink href={`/product/${product.slug.current}`} passHref>
@@ -37,7 +39,11 @@ const ProductItem = ({ product }: Props) => {
       </NextLink>
       <CardActions>
         <Typography>${product.price}</Typography>
-        <Button size='small' color='primary'>
+        <Button
+          size='small'
+          color='primary'
+          onClick={() => addToCartHandler(product)}
+        >
           Add to cart
         </Button>
       </CardActions>
