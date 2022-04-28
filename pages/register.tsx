@@ -1,3 +1,9 @@
+import React, { useContext, useEffect } from 'react';
+import NextLink from 'next/link';
+import Form from '../components/Form';
+import Layout from '../components/Layout';
+import jsCookie from 'js-cookie';
+import axios from 'axios';
 import {
   Button,
   Link,
@@ -6,16 +12,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
-import React, { useContext, useEffect } from 'react';
 import { useForm, Controller, FieldValues } from 'react-hook-form';
-import Form from '../components/Form';
-import Layout from '../components/Layout';
 import { Store } from '../utils/store';
-import jsCookie from 'js-cookie';
-import axios from 'axios';
+import { getError } from '../utils/error';
 
 const RegisterScreen = () => {
   const { dispatch, state } = useContext(Store);
@@ -59,7 +60,7 @@ const RegisterScreen = () => {
       jsCookie.set('userInfo', JSON.stringify(data));
       router.push('/');
     } catch (error: any) {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      enqueueSnackbar(getError(error), { variant: 'error' });
     }
   };
 
