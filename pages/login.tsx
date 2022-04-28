@@ -20,14 +20,15 @@ import { getError } from '../utils/error';
 
 const LoginScreen = () => {
   const { dispatch, state } = useContext(Store);
-  const router = useRouter();
   const { userInfo } = state;
+  const router = useRouter();
+  const { redirect } = router.query;
 
   useEffect(() => {
     if (userInfo) {
-      router.push('/');
+      router.push((redirect as string) || '/');
     }
-  }, [router, userInfo]);
+  }, [router, userInfo, redirect]);
 
   const {
     handleSubmit,
@@ -47,7 +48,7 @@ const LoginScreen = () => {
       dispatch({ type: 'USER_LOGIN', payload: data });
 
       jsCookie.set('userInfo', JSON.stringify(data));
-      router.push('/');
+      router.push((redirect as string) || '/');
     } catch (error: any) {
       enqueueSnackbar(getError(error), { variant: 'error' });
     }
@@ -125,7 +126,10 @@ const LoginScreen = () => {
           </ListItem>
           <ListItem>
             Do not have an account?
-            <NextLink href='/register' passHref>
+            <NextLink
+              href={`/register?redirect=${(redirect as string) || '/'}`}
+              passHref
+            >
               <Link>Register</Link>
             </NextLink>
           </ListItem>

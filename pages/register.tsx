@@ -20,14 +20,15 @@ import { getError } from '../utils/error';
 
 const RegisterScreen = () => {
   const { dispatch, state } = useContext(Store);
-  const router = useRouter();
   const { userInfo } = state;
+  const router = useRouter();
+  const { redirect } = router.query;
 
   useEffect(() => {
     if (userInfo) {
-      router.push('/');
+      router.push((redirect as string) || '/');
     }
-  }, [router, userInfo]);
+  }, [router, userInfo, redirect]);
 
   const {
     handleSubmit,
@@ -58,7 +59,7 @@ const RegisterScreen = () => {
       dispatch({ type: 'USER_LOGIN', payload: data });
 
       jsCookie.set('userInfo', JSON.stringify(data));
-      router.push('/');
+      router.push((redirect as string) || '/');
     } catch (error: any) {
       enqueueSnackbar(getError(error), { variant: 'error' });
     }
@@ -90,7 +91,7 @@ const RegisterScreen = () => {
                   error={Boolean(errors.name)}
                   helperText={
                     errors.name
-                      ? errors.name.type === 'pattern'
+                      ? errors.name.type === 'minLength'
                         ? 'Name length is more than 1'
                         : 'Name is required'
                       : ''
@@ -194,7 +195,7 @@ const RegisterScreen = () => {
           </ListItem>
           <ListItem>
             Already have an account?{' '}
-            <NextLink href='/login' passHref>
+            <NextLink href={`/login?redirect=${redirect || '/'}`} passHref>
               <Link>Login</Link>
             </NextLink>
           </ListItem>
