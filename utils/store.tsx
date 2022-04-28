@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
-import { createContext, Dispatch, useReducer } from 'react';
 import ICartItem from '../models/cartItem';
 import IUser from '../models/user';
+import { createContext, Dispatch, useReducer } from 'react';
 
 interface State {
   darkMode: boolean;
@@ -69,6 +69,8 @@ const reducer = (state: State, action: Action) => {
         ...state,
         userInfo: action.payload,
       };
+    case 'USER_LOGOUT':
+      return { ...state, userInfo: null };
     default:
       return state;
   }

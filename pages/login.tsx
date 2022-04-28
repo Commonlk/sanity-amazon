@@ -1,3 +1,9 @@
+import React, { useContext, useEffect } from 'react';
+import Form from '../components/Form';
+import NextLink from 'next/link';
+import Layout from '../components/Layout';
+import axios from 'axios';
+import jsCookie from 'js-cookie';
 import {
   Button,
   Link,
@@ -6,20 +12,46 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import NextLink from 'next/link';
-import React from 'react';
+import { useRouter } from 'next/router';
 import { useForm, Controller, FieldValues } from 'react-hook-form';
-import Form from '../components/Form';
-import Layout from '../components/Layout';
+import { Store } from '../utils/store';
+import { useSnackbar } from 'notistack';
+import { getError } from '../utils/error';
 
 const LoginScreen = () => {
+  const { dispatch, state } = useContext(Store);
+  const router = useRouter();
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (userInfo) {
+      router.push('/');
+    }
+  }, [router, userInfo]);
+
   const {
     handleSubmit,
     control,
     formState: { errors },
   } = useForm();
 
-  const submitHandler = async ({ email, password }: FieldValues) => {};
+  const { enqueueSnackbar } = useSnackbar();
+
+  const submitHandler = async ({ email, password }: FieldValues) => {
+    try {
+      const { data } = await axios.post('/api/users/login', {
+        email,
+        password,
+      });
+
+      dispatch({ type: 'USER_LOGIN', payload: data });
+
+      jsCookie.set('userInfo', JSON.stringify(data));
+      router.push('/');
+    } catch (error: any) {
+      enqueueSnackbar(getError(error), { variant: 'error' });
+    }
+  };
 
   return (
     <Layout title='Login'>

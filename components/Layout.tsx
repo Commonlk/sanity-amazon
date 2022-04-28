@@ -1,22 +1,26 @@
+import React, { useContext, useState } from 'react';
+import Head from 'next/head';
+import NextLink from 'next/link';
+import Cookies from 'js-cookie';
+import classes from '../utils/classes';
 import {
   AppBar,
   Badge,
   Box,
+  Button,
   Container,
   createTheme,
   CssBaseline,
   Link,
+  Menu,
+  MenuItem,
   Switch,
   ThemeProvider,
   Toolbar,
   Typography,
 } from '@mui/material';
-import Head from 'next/head';
-import React, { useContext } from 'react';
-import NextLink from 'next/link';
-import classes from '../utils/classes';
 import { Store } from '../utils/store';
-import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
 
 interface Props {
   title?: string;
@@ -25,8 +29,13 @@ interface Props {
 }
 
 const Layout = ({ title, description, children }: Props) => {
+  const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const { darkMode, cart, userInfo } = state;
+
+  const [anchorEl, setAnchorEl] = useState<
+    (EventTarget & HTMLButtonElement) | null
+  >(null);
 
   const theme = createTheme({
     components: {
@@ -65,6 +74,31 @@ const Layout = ({ title, description, children }: Props) => {
     Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF');
   };
 
+  const loginMenuCloseHandler = (
+    e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    redirect: string
+  ) => {
+    setAnchorEl(null);
+
+    if (redirect) {
+      router.push(redirect);
+    }
+  };
+
+  const loginClickHandler = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const logoutClickHandler = () => {
+    setAnchorEl(null);
+    dispatch({ type: 'USER_LOGOUT' });
+    Cookies.remove('userInfo');
+    Cookies.remove('cartItems');
+    router.push('/');
+  };
+
   return (
     <>
       <Head>
@@ -101,9 +135,30 @@ const Layout = ({ title, description, children }: Props) => {
                 </Link>
               </NextLink>
               {userInfo ? (
-                <NextLink href='/profile' passHref>
-                  <Link>{userInfo.name}</Link>
-                </NextLink>
+                <>
+                  <Button
+                    aria-controls='simple-menu'
+                    aria-haspopup='true'
+                    sx={classes.navbarButton}
+                    onClick={loginClickHandler}
+                  >
+                    {userInfo.name}
+                  </Button>
+                  <Menu
+                    id='simple-menu'
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={loginMenuCloseHandler}
+                  >
+                    <MenuItem
+                      onClick={e => loginMenuCloseHandler(e, '/profile')}
+                    >
+                      Profile
+                    </MenuItem>
+                    <MenuItem onClick={logoutClickHandler}>Logout</MenuItem>
+                  </Menu>
+                </>
               ) : (
                 <NextLink href='/login' passHref>
                   <Link>Login</Link>
