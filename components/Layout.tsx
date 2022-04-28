@@ -96,6 +96,7 @@ const Layout = ({ title, description, children }: Props) => {
     dispatch({ type: 'USER_LOGOUT' });
     Cookies.remove('userInfo');
     Cookies.remove('cartItems');
+    Cookies.remove('shippingAddress');
     router.push('/');
   };
 
