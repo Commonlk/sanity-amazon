@@ -7,24 +7,61 @@ import {
   Typography,
 } from '@mui/material';
 import NextLink from 'next/link';
-import React from 'react';
+import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
+import React, { useContext, useEffect } from 'react';
 import { useForm, Controller, FieldValues } from 'react-hook-form';
 import Form from '../components/Form';
 import Layout from '../components/Layout';
+import { Store } from '../utils/store';
+import jsCookie from 'js-cookie';
+import axios from 'axios';
 
 const RegisterScreen = () => {
+  const { dispatch, state } = useContext(Store);
+  const router = useRouter();
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (userInfo) {
+      router.push('/');
+    }
+  }, [router, userInfo]);
+
   const {
     handleSubmit,
     control,
     formState: { errors },
   } = useForm();
 
+  const { enqueueSnackbar } = useSnackbar();
+
   const submitHandler = async ({
     name,
     email,
     password,
     confirmPassword,
-  }: FieldValues) => {};
+  }: FieldValues) => {
+    if (password !== confirmPassword) {
+      enqueueSnackbar("Passwords don't match", { variant: 'error' });
+      return;
+    }
+
+    try {
+      const { data } = await axios.post('/api/users/register', {
+        name,
+        email,
+        password,
+      });
+
+      dispatch({ type: 'USER_LOGIN', payload: data });
+
+      jsCookie.set('userInfo', JSON.stringify(data));
+      router.push('/');
+    } catch (error: any) {
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
+  };
 
   return (
     <Layout title='Register'>
@@ -135,7 +172,7 @@ const RegisterScreen = () => {
                   fullWidth
                   id='confirmPassword'
                   label='Confirm Password'
-                  inputProps={{ type: 'confirmPassword' }}
+                  inputProps={{ type: 'password' }}
                   error={Boolean(errors.confirmPassword)}
                   helperText={
                     errors.confirmPassword

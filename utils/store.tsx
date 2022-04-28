@@ -1,12 +1,14 @@
 import Cookies from 'js-cookie';
 import { createContext, Dispatch, useReducer } from 'react';
 import ICartItem from '../models/cartItem';
+import IUser from '../models/user';
 
 interface State {
   darkMode: boolean;
   cart: {
     cartItems: ICartItem[];
   };
+  userInfo: IUser | null;
 }
 
 interface Action {
@@ -26,6 +28,9 @@ const initialState: State = {
       ? JSON.parse(Cookies.get('cartItems')!)
       : [],
   },
+  userInfo: Cookies.get('userInfo')
+    ? JSON.parse(Cookies.get('userInfo')!)
+    : null,
 };
 
 export const Store = createContext<StateContext>({
@@ -59,6 +64,11 @@ const reducer = (state: State, action: Action) => {
       Cookies.set('cartItems', JSON.stringify(cartItems));
       return { ...state, cart: { ...state.cart, cartItems } };
     }
+    case 'USER_LOGIN':
+      return {
+        ...state,
+        userInfo: action.payload,
+      };
     default:
       return state;
   }
