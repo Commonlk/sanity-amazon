@@ -2,11 +2,13 @@ import Cookies from 'js-cookie';
 import ICartItem from '../models/cartItem';
 import IUser from '../models/user';
 import { createContext, Dispatch, useReducer } from 'react';
+import IShippingAddress from '../models/shippingAddress';
 
 interface State {
   darkMode: boolean;
   cart: {
     cartItems: ICartItem[];
+    shippingAddress: IShippingAddress;
   };
   userInfo: IUser | null;
 }
@@ -27,6 +29,9 @@ const initialState: State = {
     cartItems: Cookies.get('cartItems')
       ? JSON.parse(Cookies.get('cartItems')!)
       : [],
+    shippingAddress: Cookies.get('shippingAddress')
+      ? JSON.parse(Cookies.get('shippingAddress')!)
+      : {},
   },
   userInfo: Cookies.get('userInfo')
     ? JSON.parse(Cookies.get('userInfo')!)
@@ -70,7 +75,19 @@ const reducer = (state: State, action: Action) => {
         userInfo: action.payload,
       };
     case 'USER_LOGOUT':
-      return { ...state, userInfo: null };
+      return {
+        ...state,
+        userInfo: null,
+        cart: { cartItems: [], shippingAddress: {} },
+      };
+    case 'SAVE_SHIPPING_ADDRESS':
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          shippingAddress: action.payload,
+        },
+      };
     default:
       return state;
   }
