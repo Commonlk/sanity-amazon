@@ -84,7 +84,7 @@ const Layout = ({ title, description, children }: Props) => {
             </Box>
             <Box>
               <Switch checked={darkMode} onChange={darkModeChangeHandler} />
-              <NextLink href='cart' passHref>
+              <NextLink href='/cart' passHref>
                 <Link>
                   <Typography component='span'>
                     {cart.cartItems.length > 0 ? (
@@ -99,6 +99,9 @@ const Layout = ({ title, description, children }: Props) => {
                     )}
                   </Typography>
                 </Link>
+              </NextLink>
+              <NextLink href='/login' passHref>
+                <Link>Login</Link>
               </NextLink>
             </Box>
           </Toolbar>
