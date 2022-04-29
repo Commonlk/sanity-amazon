@@ -1,14 +1,15 @@
-import Cookies from 'js-cookie';
-import ICartItem from '../models/cartItem';
-import IUser from '../models/user';
-import { createContext, Dispatch, useReducer } from 'react';
+import React, { createContext, Dispatch, useReducer } from 'react';
 import IShippingAddress from '../models/shippingAddress';
+import ICartItem from '../models/cartItem';
+import Cookies from 'js-cookie';
+import IUser from '../models/user';
 
 interface State {
   darkMode: boolean;
   cart: {
     cartItems: ICartItem[];
     shippingAddress: IShippingAddress;
+    paymentMethod: string;
   };
   userInfo: IUser | null;
 }
@@ -32,6 +33,9 @@ const initialState: State = {
     shippingAddress: Cookies.get('shippingAddress')
       ? JSON.parse(Cookies.get('shippingAddress')!)
       : {},
+    paymentMethod: Cookies.get('paymentMethod')
+      ? Cookies.get('paymentMethod')!
+      : '',
   },
   userInfo: Cookies.get('userInfo')
     ? JSON.parse(Cookies.get('userInfo')!)
@@ -39,6 +43,7 @@ const initialState: State = {
 };
 
 export const Store = createContext<StateContext>({
+  // eslint-disable-next-line no-unused-vars
   dispatch: (action: Action) => undefined,
   state: initialState,
 });
@@ -78,7 +83,7 @@ const reducer = (state: State, action: Action) => {
       return {
         ...state,
         userInfo: null,
-        cart: { cartItems: [], shippingAddress: {} },
+        cart: { cartItems: [], shippingAddress: {}, paymentMethod: '' },
       };
     case 'SAVE_SHIPPING_ADDRESS':
       return {
@@ -86,6 +91,14 @@ const reducer = (state: State, action: Action) => {
         cart: {
           ...state.cart,
           shippingAddress: action.payload,
+        },
+      };
+    case 'SAVE_PAYMENT_METHOD':
+      return {
+        ...state,
+        cart: {
+          ...state.cart,
+          paymentMethod: action.payload,
         },
       };
     default:
