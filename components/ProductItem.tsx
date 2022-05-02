@@ -30,7 +30,7 @@ const ProductItem = ({ product, addToCartHandler }: Props) => {
           />
           <CardContent sx={{ minHeight: 150 }}>
             <Typography>{product.name}</Typography>
-            <Typography>
+            <Typography component='span'>
               <Rating value={product?.rating} readOnly />
               <Typography>({product.numReviews} reviews)</Typography>
             </Typography>
