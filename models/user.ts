@@ -3,4 +3,5 @@ export default interface IUser {
   name: string;
   email: string;
   isAdmin: boolean;
+  token: string;
 }
