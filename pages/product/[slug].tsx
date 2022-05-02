@@ -1,10 +1,15 @@
 import { GetServerSideProps } from 'next';
+import Layout from '../../components/Layout';
 import NextLink from 'next/link';
+import Image from 'next/image';
+import IProduct from '../../models/product';
+import axios from 'axios';
+import client from '../../utils/client';
+import classes from '../../utils/classes';
 import {
   Alert,
   Button,
   Card,
-  CircularProgress,
   Grid,
   Link,
   List,
@@ -13,54 +18,26 @@ import {
   Typography,
 } from '@mui/material';
 import { Box } from '@mui/system';
-import { useContext, useEffect, useState } from 'react';
-import Layout from '../../components/Layout';
-import IProduct from '../../models/product';
-import client from '../../utils/client';
-import classes from '../../utils/classes';
-import Image from 'next/image';
+import { useContext } from 'react';
 import { urlFor, urlForThumbnail } from '../../utils/image';
 import { Store } from '../../utils/store';
-import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { useRouter } from 'next/router';
 
-const ProductScreen = (props: { slug: string }) => {
+const ProductScreen = ({
+  product,
+  error,
+}: {
+  product: IProduct;
+  error: any;
+}) => {
   const router = useRouter();
-  const { slug } = props;
   const {
     state: { cart },
     dispatch,
   } = useContext(Store);
 
   const { enqueueSnackbar } = useSnackbar();
-
-  const [state, setState] = useState<{
-    product: IProduct | null;
-    loading: boolean;
-    error: string;
-  }>({
-    product: null,
-    loading: true,
-    error: '',
-  });
-
-  const { product, loading, error } = state;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const product = await client.fetch(
-          `*[_type == "product" && slug.current == $slug][0]`,
-          { slug }
-        );
-        setState({ ...state, product, loading: false });
-      } catch (error: any) {
-        setState({ ...state, error: error.message, loading: false });
-      }
-    };
-    fetchData();
-  }, [setState, slug, state]);
 
   const addToCartHandler = async () => {
     const existItem = cart.cartItems.find(x => x._key === product?._id);
@@ -96,9 +73,7 @@ const ProductScreen = (props: { slug: string }) => {
 
   return (
     <Layout title={product?.title}>
-      {loading ? (
-        <CircularProgress />
-      ) : error ? (
+      {error ? (
         <Alert severity='error'>{error}</Alert>
       ) : (
         <Box>
@@ -192,9 +167,22 @@ const ProductScreen = (props: { slug: string }) => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
   if (context.params) {
-    return {
-      props: { slug: context.params.slug },
-    };
+    let product;
+
+    try {
+      product = await client.fetch(
+        `*[_type == "product" && slug.current == $slug][0]`,
+        { slug: context.params.slug }
+      );
+
+      return {
+        props: { product },
+      };
+    } catch (error: any) {
+      return {
+        props: { error },
+      };
+    }
   }
 
   return {
