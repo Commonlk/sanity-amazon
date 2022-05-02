@@ -74,6 +74,11 @@ const reducer = (state: State, action: Action) => {
       Cookies.set('cartItems', JSON.stringify(cartItems));
       return { ...state, cart: { ...state.cart, cartItems } };
     }
+    case 'CART_CLEAR':
+      return {
+        ...state,
+        cart: { ...state.cart, cartItems: [] },
+      };
     case 'USER_LOGIN':
       return {
         ...state,
