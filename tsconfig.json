@@ -22,7 +22,14 @@
     "**/*.tsx",
     "pages/_document.jsx",
     "pages/_document.jsx",
-    "./node_modules/@sanity/base/types/**/*.ts"
+    "./node_modules/@sanity/base/types/**/*.ts",
+    "sanity/schemas/shippingAddress.js",
+    "sanity/schemas/user.ks",
+    "sanity/schemas/order.js",
+    "sanity/schemas/orderItem.js",
+    "sanity/schemas/paymentResult.js",
+    "sanity/schemas/product.js",
+    "sanity/schemas/schema.js"
   ],
   "exclude": ["node_modules"]
 }
