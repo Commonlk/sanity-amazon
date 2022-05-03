@@ -50,16 +50,24 @@ const PlaceOrderScreen = () => {
   const totalPrice = round2(itemsPrice + shippingPrice + taxPrice);
 
   useEffect(() => {
-    if (!paymentMethod) router.push('/payment');
+    let isMounted = true;
+    if (isMounted) {
+      if (!paymentMethod) {
+        router.push('/payment');
+        return;
+      }
+    }
 
-    if (cartItems.length === 0) router.push('/cart');
+    return () => {
+      isMounted = false;
+    };
   }, [cartItems.length, paymentMethod, router]);
 
   const placeOrderHandler = async () => {
     try {
       setLoading(true);
       const { data } = await axios.post(
-        '/api/orders',
+        '/api/order',
         {
           orderItems: cartItems.map(x => ({
             ...x,
@@ -80,10 +88,10 @@ const PlaceOrderScreen = () => {
         }
       );
 
+      setLoading(false);
       dispatch({ type: 'CART_CLEAR' });
       Cookies.remove('cartItems');
-      setLoading(false);
-      router.push(`/orders/${data}`);
+      router.push(`/order/${data}`);
     } catch (error) {
       setLoading(false);
       enqueueSnackbar(getError(error), { variant: 'error' });
@@ -91,9 +99,9 @@ const PlaceOrderScreen = () => {
   };
 
   return (
-    <Layout title='Place Order'>
+    <Layout title="Place Order">
       <CheckoutWizard activeStep={3} />
-      <Typography component='h1' variant='h1'>
+      <Typography component="h1" variant="h1">
         Place Order
       </Typography>
 
@@ -102,7 +110,7 @@ const PlaceOrderScreen = () => {
           <Card sx={classes.section}>
             <List>
               <ListItem>
-                <Typography component='h2' variant='h2'>
+                <Typography component="h2" variant="h2">
                   Shipping Address
                 </Typography>
               </ListItem>
@@ -112,8 +120,8 @@ const PlaceOrderScreen = () => {
               <ListItem>
                 <Button
                   onClick={() => router.push('/shipping')}
-                  variant='contained'
-                  color='secondary'
+                  variant="contained"
+                  color="secondary"
                 >
                   Edit
                 </Button>
@@ -123,7 +131,7 @@ const PlaceOrderScreen = () => {
           <Card sx={classes.section}>
             <List>
               <ListItem>
-                <Typography component='h2' variant='h2'>
+                <Typography component="h2" variant="h2">
                   Payment Method
                 </Typography>
               </ListItem>
@@ -131,8 +139,8 @@ const PlaceOrderScreen = () => {
               <ListItem>
                 <Button
                   onClick={() => router.push('/payment')}
-                  variant='contained'
-                  color='secondary'
+                  variant="contained"
+                  color="secondary"
                 >
                   Edit
                 </Button>
@@ -142,7 +150,7 @@ const PlaceOrderScreen = () => {
           <Card sx={classes.section}>
             <List>
               <ListItem>
-                <Typography component='h2' variant='h2'>
+                <Typography component="h2" variant="h2">
                   Order Items
                 </Typography>
               </ListItem>
@@ -152,8 +160,8 @@ const PlaceOrderScreen = () => {
                     <TableRow>
                       <TableCell>Image</TableCell>
                       <TableCell>Name</TableCell>
-                      <TableCell align='right'>Quantity</TableCell>
-                      <TableCell align='right'>Price</TableCell>
+                      <TableCell align="right">Quantity</TableCell>
+                      <TableCell align="right">Price</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -178,10 +186,10 @@ const PlaceOrderScreen = () => {
                             </Link>
                           </NextLink>
                         </TableCell>
-                        <TableCell align='right'>
+                        <TableCell align="right">
                           <Typography>{item.quantity}</Typography>
                         </TableCell>
-                        <TableCell align='right'>
+                        <TableCell align="right">
                           <Typography>$ {item.price}</Typography>
                         </TableCell>
                       </TableRow>
@@ -192,8 +200,8 @@ const PlaceOrderScreen = () => {
               <ListItem>
                 <Button
                   onClick={() => router.push('/payment')}
-                  variant='contained'
-                  color='secondary'
+                  variant="contained"
+                  color="secondary"
                 >
                   Edit
                 </Button>
@@ -205,7 +213,7 @@ const PlaceOrderScreen = () => {
           <Card sx={classes.section}>
             <List>
               <ListItem>
-                <Typography variant='h2'>Order Summary</Typography>
+                <Typography variant="h2">Order Summary</Typography>
               </ListItem>
               <ListItem>
                 <Grid container>
@@ -213,7 +221,7 @@ const PlaceOrderScreen = () => {
                     <Typography>Items: </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography align='right'>$ {itemsPrice}</Typography>
+                    <Typography align="right">$ {itemsPrice}</Typography>
                   </Grid>
                 </Grid>
               </ListItem>
@@ -223,7 +231,7 @@ const PlaceOrderScreen = () => {
                     <Typography>Shipping: </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography align='right'>$ {shippingPrice}</Typography>
+                    <Typography align="right">$ {shippingPrice}</Typography>
                   </Grid>
                 </Grid>
               </ListItem>
@@ -233,15 +241,15 @@ const PlaceOrderScreen = () => {
                     <Typography>Total: </Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography align='right'>$ {totalPrice}</Typography>
+                    <Typography align="right">$ {totalPrice}</Typography>
                   </Grid>
                 </Grid>
               </ListItem>
               <ListItem>
                 <Button
                   onClick={placeOrderHandler}
-                  variant='contained'
-                  color='primary'
+                  variant="contained"
+                  color="primary"
                   fullWidth
                   disabled={loading}
                 >
