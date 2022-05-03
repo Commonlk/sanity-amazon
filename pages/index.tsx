@@ -1,13 +1,13 @@
-import { Alert, CircularProgress, Grid } from '@mui/material';
+import Layout from '../components/Layout';
+import ProductItem from '../components/ProductItem';
+import IProduct from '../models/product';
 import axios from 'axios';
+import client from '../utils/client';
+import { Alert, CircularProgress, Grid } from '@mui/material';
 import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
 import { useContext, useEffect, useState } from 'react';
-import Layout from '../components/Layout';
-import ProductItem from '../components/ProductItem';
-import IProduct from '../models/product';
-import client from '../utils/client';
 import { urlForThumbnail } from '../utils/image';
 import { Store } from '../utils/store';
 
