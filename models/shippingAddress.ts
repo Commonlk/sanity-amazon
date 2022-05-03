@@ -1,4 +1,4 @@
-export default interface IShippingAddress {
+export default interface ShippingAddress {
   fullName: string;
   address: string;
   city: string;

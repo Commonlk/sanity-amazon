@@ -1,4 +1,4 @@
-export default interface ICartItem {
+export default interface CartItem {
   _key: string;
   name: string;
   countInStock: number;
