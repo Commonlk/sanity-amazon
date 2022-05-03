@@ -1,14 +1,14 @@
 import React, { createContext, Dispatch, useReducer } from 'react';
-import IShippingAddress from '../models/shippingAddress';
-import ICartItem from '../models/cartItem';
+import ShippingAddress from '../models/shippingAddress';
+import CartItem from '../models/cartItem';
 import Cookies from 'js-cookie';
 import IUser from '../models/user';
 
 interface State {
   darkMode: boolean;
   cart: {
-    cartItems: ICartItem[];
-    shippingAddress: IShippingAddress;
+    cartItems: CartItem[];
+    shippingAddress: ShippingAddress;
     paymentMethod: string;
   };
   userInfo: IUser | null;
