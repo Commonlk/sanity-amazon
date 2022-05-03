@@ -1,7 +1,7 @@
 import NextLink from 'next/link';
 import Layout from '../components/Layout';
 import Image from 'next/image';
-import ICartItem from '../models/cartItem';
+import CartItem from '../models/cartItem';
 import IProduct from '../models/product';
 import dynamic from 'next/dynamic';
 import axios from 'axios';
@@ -21,8 +21,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Box,
 } from '@mui/material';
-import { Box } from '@mui/system';
 import { useContext } from 'react';
 import { Store } from '../utils/store';
 import { useSnackbar } from 'notistack';
@@ -40,7 +40,7 @@ const CartScreen = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const updateCartHandler = async (
-    item: ICartItem,
+    item: CartItem,
     quantity: string | number
   ) => {
     const { data }: { data: IProduct } = await axios.get(
@@ -72,7 +72,7 @@ const CartScreen = () => {
     });
   };
 
-  const removeItemHandler = (item: ICartItem) => {
+  const removeItemHandler = (item: CartItem) => {
     dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
   };
 

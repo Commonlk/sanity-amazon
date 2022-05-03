@@ -16,8 +16,8 @@ import {
   ListItem,
   Rating,
   Typography,
+  Box,
 } from '@mui/material';
-import { Box } from '@mui/system';
 import { useContext } from 'react';
 import { urlFor, urlForThumbnail } from '../../utils/image';
 import { Store } from '../../utils/store';
