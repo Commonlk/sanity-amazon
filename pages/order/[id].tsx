@@ -1,14 +1,18 @@
 import React, { useContext, useEffect, useReducer } from 'react';
-import Order from '../../models/order';
-import dynamic from 'next/dynamic';
-import Layout from '../../components/Layout';
-import NextLink from 'next/link';
-import classes from '../../utils/classes';
-import Image from 'next/image';
-import axios from 'axios';
 import { GetServerSideProps } from 'next';
+import { useSnackbar } from 'notistack';
+import {
+  PayPalButtons,
+  SCRIPT_LOADING_STATE,
+  usePayPalScriptReducer,
+} from '@paypal/react-paypal-js';
+import NextLink from 'next/link';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import axios from 'axios';
 import {
   Alert,
+  Box,
   Card,
   CircularProgress,
   Grid,
@@ -23,6 +27,10 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
+
+import Order from '../../models/order';
+import Layout from '../../components/Layout';
+import classes from '../../utils/classes';
 import { Store } from '../../utils/store';
 import { useRouter } from 'next/router';
 import { getError } from '../../utils/error';
@@ -31,35 +39,56 @@ enum ActionType {
   REQUEST = 'FETCH_REQUEST',
   SUCCESS = 'FETCH_SUCCESS',
   FAIL = 'FETCH_FAIL',
+  PAY_REQUEST = 'PAY_REQUEST',
+  PAY_SUCCESS = 'PAY_SUCCESS',
+  PAY_FAIL = 'PAY_FAIL',
+  PAY_RESET = 'PAY_RESET',
 }
 
 interface Props {
-  params: any;
+  params: { id: string };
 }
 
 interface State {
-  order: Order;
+  order: Order | null;
   error: string;
+  errorPay: string;
   loading: boolean;
+  loadingPay: boolean;
+  successPay: boolean;
 }
 
-interface Action {
-  type: ActionType;
-  payload?: any;
-}
+type Action =
+  | { type: ActionType.REQUEST }
+  | { type: ActionType.SUCCESS; payload: Order }
+  | { type: ActionType.FAIL; payload: string }
+  | { type: ActionType.PAY_REQUEST }
+  | { type: ActionType.PAY_SUCCESS }
+  | { type: ActionType.PAY_FAIL; payload: string }
+  | { type: ActionType.PAY_RESET };
 
-const reducer = (state: State, action: Action) => {
-  const { type, payload } = action;
-
-  switch (type) {
+const reducer = (state: State, action: Action): State => {
+  switch (action.type) {
     case ActionType.REQUEST: {
       return { ...state, loading: true, error: '' };
     }
     case ActionType.SUCCESS: {
-      return { ...state, loading: false, order: payload, error: '' };
+      return { ...state, loading: false, order: action.payload, error: '' };
     }
     case ActionType.FAIL: {
-      return { ...state, loading: false, error: payload };
+      return { ...state, loading: false, error: action.payload };
+    }
+    case ActionType.PAY_REQUEST: {
+      return { ...state, loadingPay: true };
+    }
+    case ActionType.PAY_SUCCESS: {
+      return { ...state, loadingPay: false, successPay: true };
+    }
+    case ActionType.PAY_FAIL: {
+      return { ...state, loadingPay: false, errorPay: action.payload };
+    }
+    case ActionType.PAY_RESET: {
+      return { ...state, loadingPay: false, successPay: false, errorPay: '' };
     }
     default: {
       return { ...state };
@@ -67,15 +96,25 @@ const reducer = (state: State, action: Action) => {
   }
 };
 
+const initialState: State = {
+  order: null,
+  error: '',
+  errorPay: '',
+  loading: false,
+  loadingPay: false,
+  successPay: false,
+};
+
 const OrderScreen = ({ params }: Props) => {
+  const { enqueueSnackbar } = useSnackbar();
   const { id: orderId } = params;
+  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
   const router = useRouter();
 
-  const [{ order, loading, error }, dispatch] = useReducer(reducer, {
-    loading: true,
-    order: {},
-    error: '',
-  });
+  const [{ order, loading, error, successPay }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const {
     state: { userInfo },
   } = useContext(Store);
@@ -92,17 +131,18 @@ const OrderScreen = ({ params }: Props) => {
     shippingPrice,
     taxPrice,
     totalPrice,
-  }: Order = order;
+  } = order || {};
 
   useEffect(() => {
     if (!userInfo) {
       router.push('/login');
       return;
     }
+
     const fetchOrder = async () => {
-      // dispatch({ type: ActionType.REQUEST });
+      dispatch({ type: ActionType.REQUEST });
       try {
-        const { data } = await axios.get(`/api/order/${orderId}`, {
+        const { data } = await axios.get(`/api/orders/${orderId}`, {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         });
 
@@ -112,15 +152,76 @@ const OrderScreen = ({ params }: Props) => {
       }
     };
 
-    fetchOrder();
-  }, [orderId, router, userInfo]);
+    if (!order?._id || successPay || (order?._id && order?._id !== orderId)) {
+      fetchOrder();
+      if (successPay) {
+        dispatch({ type: ActionType.PAY_RESET });
+      }
+    } else {
+      const loadPaypalScript = async () => {
+        const { data: clientId } = await axios.get('/api/keys/paypal', {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        });
+
+        paypalDispatch({
+          type: 'resetOptions',
+          value: { 'client-id': clientId, currency: 'USD' },
+        });
+      };
+
+      paypalDispatch({
+        type: 'setLoadingStatus',
+        value: SCRIPT_LOADING_STATE.PENDING,
+      });
+      loadPaypalScript();
+    }
+  }, [orderId, router, userInfo, successPay, order, paypalDispatch]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const createOrder = (data: Record<string, unknown>, actions: any) => {
+    return actions.order
+      .create({
+        purchase_units: [
+          {
+            amount: { value: totalPrice },
+          },
+        ],
+      })
+      .then((orderID: string) => {
+        return orderID;
+      });
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onApprove = (data: Record<string, unknown>, actions: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return actions.order.capture().then(async (details: any) => {
+      try {
+        dispatch({ type: ActionType.PAY_REQUEST });
+
+        await axios.put(`/api/orders/${order?._id}/pay`, details, {
+          headers: { Authorization: `Bearer ${userInfo?.token}` },
+        });
+
+        dispatch({ type: ActionType.PAY_SUCCESS });
+        enqueueSnackbar('Order is paid', { variant: 'success' });
+      } catch (err) {
+        dispatch({ type: ActionType.PAY_FAIL, payload: getError(err) });
+        enqueueSnackbar(getError(err), { variant: 'error' });
+      }
+    });
+  };
+
+  const onError = (err: Record<string, unknown>) => {
+    enqueueSnackbar(getError(err), { variant: 'error' });
+  };
 
   return (
     <Layout title={`Order ${orderId}`}>
       <Typography component="h1" variant="h1">
         Order {orderId}
       </Typography>
-      {loading ? (
+      {loading || !order ? (
         <CircularProgress />
       ) : error ? (
         <Alert severity="error">{error}</Alert>
@@ -135,9 +236,9 @@ const OrderScreen = ({ params }: Props) => {
                   </Typography>
                 </ListItem>
                 <ListItem>
-                  {shippingAddress.fullName}, {shippingAddress.address},{' '}
-                  {shippingAddress.city}, {shippingAddress.postalCode},{' '}
-                  {shippingAddress.country}
+                  {shippingAddress?.fullName}, {shippingAddress?.address},{' '}
+                  {shippingAddress?.city}, {shippingAddress?.postalCode},{' '}
+                  {shippingAddress?.country}
                 </ListItem>
                 <ListItem>
                   Status:{' '}
@@ -179,7 +280,7 @@ const OrderScreen = ({ params }: Props) => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {orderItems.map(item => (
+                        {orderItems?.map(item => (
                           <TableRow key={item._key}>
                             <TableCell>
                               <NextLink href={`/product/${item.slug}`} passHref>
@@ -204,7 +305,7 @@ const OrderScreen = ({ params }: Props) => {
                               <Typography>{item.quantity}</Typography>
                             </TableCell>
                             <TableCell align="right">
-                              <Typography>{item.price}</Typography>
+                              <Typography>${item.price}</Typography>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -261,6 +362,21 @@ const OrderScreen = ({ params }: Props) => {
                     </Grid>
                   </Grid>
                 </ListItem>
+                {!isPaid && (
+                  <ListItem>
+                    {isPending ? (
+                      <CircularProgress />
+                    ) : (
+                      <Box sx={classes.fullWidth}>
+                        <PayPalButtons
+                          createOrder={createOrder}
+                          onApprove={onApprove}
+                          onError={onError}
+                        />
+                      </Box>
+                    )}
+                  </ListItem>
+                )}
               </List>
             </Card>
           </Grid>
