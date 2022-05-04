@@ -67,7 +67,7 @@ const PlaceOrderScreen = () => {
     try {
       setLoading(true);
       const { data } = await axios.post(
-        '/api/order',
+        '/api/orders',
         {
           orderItems: cartItems.map(x => ({
             ...x,
@@ -83,7 +83,7 @@ const PlaceOrderScreen = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${userInfo!.token}`,
+            Authorization: `Bearer ${userInfo?.token}`,
           },
         }
       );
