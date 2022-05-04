@@ -2,6 +2,7 @@ import ShippingAddress from '../models/shippingAddress';
 import CartItem from './cartItem';
 
 export default interface Order {
+  _id: string;
   orderItems: CartItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: string;
