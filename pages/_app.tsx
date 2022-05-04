@@ -1,9 +1,12 @@
-import '../styles/globals.css';
+import React from 'react';
 import type { AppProps } from 'next/app';
 import createCache from '@emotion/cache';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { CacheProvider, EmotionCache } from '@emotion/react';
-import { StoreProvider } from '../utils/store';
 import { SnackbarProvider } from 'notistack';
+
+import { StoreProvider } from '../utils/store';
+import '../styles/globals.css';
 
 const clientSideEmotionCache = createCache({ key: 'css' });
 
@@ -22,7 +25,12 @@ function MyApp({
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <StoreProvider>
-          <Component {...pageProps} />
+          <PayPalScriptProvider
+            deferLoading={true}
+            options={{ 'client-id': 'test' }}
+          >
+            <Component {...pageProps} />
+          </PayPalScriptProvider>
         </StoreProvider>
       </SnackbarProvider>
     </CacheProvider>
