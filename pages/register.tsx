@@ -1,9 +1,10 @@
 import React, { useContext, useEffect } from 'react';
 import NextLink from 'next/link';
-import Form from '../components/Form';
-import Layout from '../components/Layout';
-import jsCookie from 'js-cookie';
+import Cookies from 'js-cookie';
 import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
+import { useForm, Controller, FieldValues } from 'react-hook-form';
 import {
   Button,
   Link,
@@ -12,9 +13,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/router';
-import { useSnackbar } from 'notistack';
-import { useForm, Controller, FieldValues } from 'react-hook-form';
+
+import Form from '../components/Form';
+import Layout from '../components/Layout';
 import { Store } from '../utils/store';
 import { getError } from '../utils/error';
 
@@ -58,35 +59,35 @@ const RegisterScreen = () => {
 
       dispatch({ type: 'USER_LOGIN', payload: data });
 
-      jsCookie.set('userInfo', JSON.stringify(data));
+      Cookies.set('userInfo', JSON.stringify(data), { sameSite: 'strict' });
       router.push((redirect as string) || '/');
-    } catch (error: any) {
+    } catch (error) {
       enqueueSnackbar(getError(error), { variant: 'error' });
     }
   };
 
   return (
-    <Layout title='Register'>
+    <Layout title="Register">
       <Form onSubmit={handleSubmit(submitHandler)}>
-        <Typography component='h1' variant='h1'>
+        <Typography component="h1" variant="h1">
           Register
         </Typography>
         <List>
           <ListItem>
             <Controller
-              name='name'
+              name="name"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 minLength: 2,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='name'
-                  label='Name'
+                  id="name"
+                  label="Name"
                   inputProps={{ type: 'name' }}
                   error={Boolean(errors.name)}
                   helperText={
@@ -103,19 +104,19 @@ const RegisterScreen = () => {
           </ListItem>
           <ListItem>
             <Controller
-              name='email'
+              name="email"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='email'
-                  label='Email'
+                  id="email"
+                  label="Email"
                   inputProps={{ type: 'email' }}
                   error={Boolean(errors.email)}
                   helperText={
@@ -132,19 +133,19 @@ const RegisterScreen = () => {
           </ListItem>
           <ListItem>
             <Controller
-              name='password'
+              name="password"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 minLength: 6,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='password'
-                  label='Password'
+                  id="password"
+                  label="Password"
                   inputProps={{ type: 'password' }}
                   error={Boolean(errors.password)}
                   helperText={
@@ -161,19 +162,19 @@ const RegisterScreen = () => {
           </ListItem>
           <ListItem>
             <Controller
-              name='confirmPassword'
+              name="confirmPassword"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 minLength: 6,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='confirmPassword'
-                  label='Confirm Password'
+                  id="confirmPassword"
+                  label="Confirm Password"
                   inputProps={{ type: 'password' }}
                   error={Boolean(errors.confirmPassword)}
                   helperText={
@@ -189,7 +190,7 @@ const RegisterScreen = () => {
             />
           </ListItem>
           <ListItem>
-            <Button variant='contained' type='submit' fullWidth color='primary'>
+            <Button variant="contained" type="submit" fullWidth color="primary">
               Register
             </Button>
           </ListItem>

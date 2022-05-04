@@ -1,17 +1,24 @@
-import Layout from '../components/Layout';
-import ProductItem from '../components/ProductItem';
-import IProduct from '../models/product';
+import React, { useContext } from 'react';
 import axios from 'axios';
-import client from '../utils/client';
-import { Alert, CircularProgress, Grid } from '@mui/material';
-import type { NextPage } from 'next';
+import { Alert, Grid } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useSnackbar } from 'notistack';
-import { useContext, useEffect, useState } from 'react';
-import { urlForThumbnail } from '../utils/image';
-import { Store } from '../utils/store';
+import type { GetServerSideProps } from 'next';
+import { ServerError } from '@sanity/client';
 
-const Home: NextPage = () => {
+import Layout from '../components/Layout';
+import ProductItem from '../components/ProductItem';
+import Product from '../models/product';
+import client from '../utils/client';
+import { urlForThumbnail } from '../utils/image';
+import { ActionType, Store } from '../utils/store';
+
+interface Props {
+  products: Product[];
+  error: ServerError;
+}
+
+const Home = ({ products, error }: Props) => {
   const router = useRouter();
   const {
     state: { cart },
@@ -20,36 +27,10 @@ const Home: NextPage = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [state, setState] = useState<{
-    products?: IProduct[] | null;
-    error?: string;
-    loading: boolean;
-  }>({
-    products: null,
-    error: '',
-    loading: true,
-  });
-
-  const { loading, error, products } = state;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const products: IProduct[] = await client.fetch(
-          `*[_type == "product"]`
-        );
-        setState({ products, loading: false });
-      } catch (error: any) {
-        setState({ loading: false, error: error.message });
-      }
-    };
-    fetchData();
-  }, []);
-
-  const addToCartHandler = async (product: IProduct) => {
+  const addToCartHandler = async (product: Product) => {
     const existItem = cart.cartItems.find(x => x._key === product?._id);
     const quantity = existItem ? existItem.quantity + 1 : 1;
-    const { data }: { data: IProduct } = await axios.get(
+    const { data }: { data: Product } = await axios.get(
       `/api/products/${product?._id}`
     );
 
@@ -59,7 +40,7 @@ const Home: NextPage = () => {
     }
 
     dispatch({
-      type: 'CART_ADD_ITEM',
+      type: ActionType.CART_ADD_ITEM,
       payload: {
         _key: product?._id,
         name: product?.name,
@@ -81,13 +62,11 @@ const Home: NextPage = () => {
   return (
     <div>
       <Layout>
-        {loading ? (
-          <CircularProgress />
-        ) : error ? (
-          <Alert severity='error'>{error}</Alert>
+        {error ? (
+          <Alert severity="error">{error.message}</Alert>
         ) : (
           <Grid container spacing={3}>
-            {products!.map(product => (
+            {products?.map(product => (
               <Grid item md={4} key={product.slug.current}>
                 <ProductItem
                   product={product}
@@ -100,6 +79,22 @@ const Home: NextPage = () => {
       </Layout>
     </div>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async () => {
+  let products: Product[];
+
+  try {
+    products = await client.fetch(`*[_type == "product"]`);
+
+    return {
+      props: { products },
+    };
+  } catch (error) {
+    return {
+      props: { error },
+    };
+  }
 };
 
 export default Home;

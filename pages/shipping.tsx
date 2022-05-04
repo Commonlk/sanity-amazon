@@ -1,13 +1,14 @@
 import React, { useContext, useEffect } from 'react';
 import CheckoutWizard from '../components/CheckoutWizard';
-import Form from '../components/Form';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
+import { Controller, FieldValues, useForm } from 'react-hook-form';
+import { Button, List, ListItem, TextField, Typography } from '@mui/material';
+
 import Layout from '../components/Layout';
 import FormInput from '../components/FormInput';
-import { Button, List, ListItem, TextField, Typography } from '@mui/material';
-import { Controller, FieldValues, useForm } from 'react-hook-form';
-import { useRouter } from 'next/router';
-import { Store } from '../utils/store';
-import Cookies from 'js-cookie';
+import Form from '../components/Form';
+import { ActionType, Store } from '../utils/store';
 
 const ShippingScreen = () => {
   const {
@@ -31,7 +32,8 @@ const ShippingScreen = () => {
       return;
     }
 
-    const { address, city, country, fullName, postalCode } = shippingAddress;
+    const { address, city, country, fullName, postalCode } =
+      shippingAddress || {};
 
     setValue('fullName', fullName);
     setValue('address', address);
@@ -48,41 +50,42 @@ const ShippingScreen = () => {
     postalCode,
   }: FieldValues) => {
     dispatch({
-      type: 'SAVE_SHIPPING_ADDRESS',
+      type: ActionType.SAVE_SHIPPING_ADDRESS,
       payload: { address, city, country, fullName, postalCode },
     });
 
     Cookies.set(
       'shippingAddress',
-      JSON.stringify({ address, city, country, fullName, postalCode })
+      JSON.stringify({ address, city, country, fullName, postalCode }),
+      { sameSite: 'Strict' }
     );
 
     router.push('/payment');
   };
 
   return (
-    <Layout title='Shipping Address'>
+    <Layout title="Shipping Address">
       <CheckoutWizard activeStep={1}></CheckoutWizard>
       <Form onSubmit={handleSubmit(submitHandler)}>
-        <Typography component='h1' variant='h1'>
+        <Typography component="h1" variant="h1">
           Shipping Address
         </Typography>
         <List>
           <ListItem>
             <Controller
-              name='fullName'
+              name="fullName"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 minLength: 2,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='fullName'
-                  label='Full Name'
+                  id="fullName"
+                  label="Full Name"
                   inputProps={{ type: 'fullName' }}
                   error={Boolean(errors.fullName)}
                   helperText={
@@ -100,8 +103,8 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
-              name='address'
-              label='Address'
+              name="address"
+              label="Address"
               inputProps={{ type: 'address' }}
               error={Boolean(errors.address)}
               helperText={
@@ -116,8 +119,8 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
-              name='city'
-              label='City'
+              name="city"
+              label="City"
               inputProps={{ type: 'city' }}
               error={Boolean(errors.city)}
               helperText={
@@ -132,8 +135,8 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
-              name='postalCode'
-              label='Postal Code'
+              name="postalCode"
+              label="Postal Code"
               inputProps={{ type: 'postalCode' }}
               error={Boolean(errors.postalCode)}
               helperText={
@@ -148,8 +151,8 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
-              name='country'
-              label='Country'
+              name="country"
+              label="Country"
               inputProps={{ type: 'country' }}
               error={Boolean(errors.country)}
               helperText={
@@ -162,7 +165,7 @@ const ShippingScreen = () => {
             />
           </ListItem>
           <ListItem>
-            <Button variant='contained' type='submit' fullWidth color='primary'>
+            <Button variant="contained" type="submit" fullWidth color="primary">
               Continue
             </Button>
           </ListItem>

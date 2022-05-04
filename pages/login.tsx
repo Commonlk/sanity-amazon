@@ -1,9 +1,10 @@
 import React, { useContext, useEffect } from 'react';
-import Form from '../components/Form';
 import NextLink from 'next/link';
-import Layout from '../components/Layout';
+import Cookies from 'js-cookie';
 import axios from 'axios';
-import jsCookie from 'js-cookie';
+import { useForm, Controller, FieldValues } from 'react-hook-form';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/router';
 import {
   Button,
   Link,
@@ -12,10 +13,11 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/router';
-import { useForm, Controller, FieldValues } from 'react-hook-form';
-import { Store } from '../utils/store';
-import { useSnackbar } from 'notistack';
+
+import User from '../models/user';
+import Layout from '../components/Layout';
+import Form from '../components/Form';
+import { ActionType, Store } from '../utils/store';
 import { getError } from '../utils/error';
 
 const LoginScreen = () => {
@@ -40,42 +42,42 @@ const LoginScreen = () => {
 
   const submitHandler = async ({ email, password }: FieldValues) => {
     try {
-      const { data } = await axios.post('/api/users/login', {
+      const { data }: { data: User } = await axios.post('/api/users/login', {
         email,
         password,
       });
 
-      dispatch({ type: 'USER_LOGIN', payload: data });
+      dispatch({ type: ActionType.USER_LOGIN, payload: data });
 
-      jsCookie.set('userInfo', JSON.stringify(data));
+      Cookies.set('userInfo', JSON.stringify(data), { sameSite: 'Strict' });
       router.push((redirect as string) || '/');
-    } catch (error: any) {
+    } catch (error) {
       enqueueSnackbar(getError(error), { variant: 'error' });
     }
   };
 
   return (
-    <Layout title='Login'>
+    <Layout title="Login">
       <Form onSubmit={handleSubmit(submitHandler)}>
-        <Typography component='h1' variant='h1'>
+        <Typography component="h1" variant="h1">
           Login
         </Typography>
         <List>
           <ListItem>
             <Controller
-              name='email'
+              name="email"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='email'
-                  label='Email'
+                  id="email"
+                  label="Email"
                   inputProps={{ type: 'email' }}
                   error={Boolean(errors.email)}
                   helperText={
@@ -92,19 +94,19 @@ const LoginScreen = () => {
           </ListItem>
           <ListItem>
             <Controller
-              name='password'
+              name="password"
               control={control}
-              defaultValue=''
+              defaultValue=""
               rules={{
                 required: true,
                 minLength: 6,
               }}
               render={({ field }) => (
                 <TextField
-                  variant='outlined'
+                  variant="outlined"
                   fullWidth
-                  id='password'
-                  label='Password'
+                  id="password"
+                  label="Password"
                   inputProps={{ type: 'password' }}
                   error={Boolean(errors.password)}
                   helperText={
@@ -120,7 +122,7 @@ const LoginScreen = () => {
             />
           </ListItem>
           <ListItem>
-            <Button variant='contained' type='submit' fullWidth color='primary'>
+            <Button variant="contained" type="submit" fullWidth color="primary">
               Login
             </Button>
           </ListItem>

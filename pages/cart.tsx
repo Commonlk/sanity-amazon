@@ -1,10 +1,10 @@
+import React, { useContext } from 'react';
 import NextLink from 'next/link';
-import Layout from '../components/Layout';
 import Image from 'next/image';
-import CartItem from '../models/cartItem';
-import IProduct from '../models/product';
 import dynamic from 'next/dynamic';
 import axios from 'axios';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/router';
 import {
   Button,
   Card,
@@ -23,10 +23,11 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { useContext } from 'react';
-import { Store } from '../utils/store';
-import { useSnackbar } from 'notistack';
-import { useRouter } from 'next/router';
+
+import Layout from '../components/Layout';
+import CartItem from '../models/cartItem';
+import IProduct from '../models/product';
+import { Store, ActionType } from '../utils/store';
 
 const CartScreen = () => {
   const router = useRouter();
@@ -55,7 +56,7 @@ const CartScreen = () => {
     }
 
     dispatch({
-      type: 'CART_ADD_ITEM',
+      type: ActionType.CART_ADD_ITEM,
       payload: {
         _key: item?._key,
         name: item?.name,
@@ -63,7 +64,7 @@ const CartScreen = () => {
         slug: item?.slug,
         price: item?.price,
         image: item.image,
-        quantity,
+        quantity: quantity as number,
       },
     });
 
@@ -73,19 +74,19 @@ const CartScreen = () => {
   };
 
   const removeItemHandler = (item: CartItem) => {
-    dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
+    dispatch({ type: ActionType.CART_REMOVE_ITEM, payload: item });
   };
 
   return (
-    <Layout title='Shopping Cart'>
-      <Typography component='h1' variant='h1'>
+    <Layout title="Shopping Cart">
+      <Typography component="h1" variant="h1">
         Shopping Cart
       </Typography>
       {cartItems.length === 0 ? (
         <Box>
           <Typography>
             Cart is empty.{' '}
-            <NextLink href='/' passHref>
+            <NextLink href="/" passHref>
               <Link>Go shopping</Link>
             </NextLink>
           </Typography>
@@ -99,9 +100,9 @@ const CartScreen = () => {
                   <TableRow>
                     <TableCell>Image</TableCell>
                     <TableCell>Name</TableCell>
-                    <TableCell align='right'>Quantity</TableCell>
-                    <TableCell align='right'>Price</TableCell>
-                    <TableCell align='right'>Action</TableCell>
+                    <TableCell align="right">Quantity</TableCell>
+                    <TableCell align="right">Price</TableCell>
+                    <TableCell align="right">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -126,7 +127,7 @@ const CartScreen = () => {
                           </Link>
                         </NextLink>
                       </TableCell>
-                      <TableCell align='right'>
+                      <TableCell align="right">
                         <Select
                           value={item.quantity}
                           onChange={e =>
@@ -134,7 +135,7 @@ const CartScreen = () => {
                           }
                         >
                           {[...Array(item.countInStock).keys()].map(
-                            (x: any) => (
+                            (x: number) => (
                               <MenuItem key={x + 1} value={x + 1}>
                                 {x + 1}
                               </MenuItem>
@@ -142,13 +143,13 @@ const CartScreen = () => {
                           )}
                         </Select>
                       </TableCell>
-                      <TableCell align='right'>
+                      <TableCell align="right">
                         <Typography>${item.price}</Typography>
                       </TableCell>
-                      <TableCell align='right'>
+                      <TableCell align="right">
                         <Button
-                          variant='contained'
-                          color='secondary'
+                          variant="contained"
+                          color="secondary"
                           onClick={() => removeItemHandler(item)}
                         >
                           X
@@ -164,7 +165,7 @@ const CartScreen = () => {
             <Card>
               <List>
                 <ListItem>
-                  <Typography variant='h2'>
+                  <Typography variant="h2">
                     Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)}{' '}
                     items) : $
                     {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
@@ -174,8 +175,8 @@ const CartScreen = () => {
                   <Button
                     onClick={() => router.push('/shipping')}
                     fullWidth
-                    color='primary'
-                    variant='contained'
+                    color="primary"
+                    variant="contained"
                   >
                     Checkout
                   </Button>

@@ -1,11 +1,13 @@
-import config from '../../../utils/config';
-import axios from 'axios';
 import nc from 'next-connect';
+import axios from 'axios';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+import config from '../../../utils/config';
 import { isAuth } from '../../../utils/auth';
+import User from '../../../models/user';
 
 interface ExtendedRequest extends NextApiRequest {
-  user: any;
+  user: User;
 }
 
 const handler = nc<ExtendedRequest, NextApiResponse>();

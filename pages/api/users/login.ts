@@ -1,7 +1,8 @@
 import nc from 'next-connect';
 import bcrypt from 'bcryptjs';
-import client from '../../../utils/client';
 import { NextApiRequest, NextApiResponse } from 'next';
+
+import client from '../../../utils/client';
 import { signToken } from '../../../utils/auth';
 
 const handler = nc<NextApiRequest, NextApiResponse>();

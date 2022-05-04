@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import nc from 'next-connect';
+
 import client from '../../../utils/client';
 
 const handler = nc<NextApiRequest, NextApiResponse>();

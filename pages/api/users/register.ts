@@ -1,9 +1,10 @@
 import nc from 'next-connect';
 import bcrypt from 'bcryptjs';
 import axios from 'axios';
+import { NextApiRequest, NextApiResponse } from 'next';
+
 import config from '../../../utils/config';
 import client from '../../../utils/client';
-import { NextApiRequest, NextApiResponse } from 'next';
 import { signToken } from '../../../utils/auth';
 
 const handler = nc<NextApiRequest, NextApiResponse>();

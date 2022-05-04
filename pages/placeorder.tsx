@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import CheckoutWizard from '../components/CheckoutWizard';
-import Layout from '../components/Layout';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
+import dynamic from 'next/dynamic';
 import axios from 'axios';
-import classes from '../utils/classes';
+import { useRouter } from 'next/router';
+import { useSnackbar } from 'notistack';
 import {
   Button,
   Card,
@@ -22,11 +23,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { useRouter } from 'next/router';
-import { Store } from '../utils/store';
-import { useSnackbar } from 'notistack';
+
+import classes from '../utils/classes';
+import Layout from '../components/Layout';
+import { ActionType, Store } from '../utils/store';
 import { getError } from '../utils/error';
-import dynamic from 'next/dynamic';
 
 const PlaceOrderScreen = () => {
   const [loading, setLoading] = useState(false);
@@ -35,11 +36,14 @@ const PlaceOrderScreen = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const { state, dispatch } = useContext(Store);
+
   const {
     cart: { shippingAddress, paymentMethod, cartItems },
     userInfo,
   } = state;
-  const { address, city, country, fullName, postalCode } = shippingAddress;
+
+  const { address, city, country, fullName, postalCode } =
+    shippingAddress || {};
 
   const round2 = (num: number) => Math.round(num * 100 + Number.EPSILON) / 100; // 123.456 => 123.46
   const itemsPrice = round2(
@@ -89,7 +93,7 @@ const PlaceOrderScreen = () => {
       );
 
       setLoading(false);
-      dispatch({ type: 'CART_CLEAR' });
+      dispatch({ type: ActionType.CART_CLEAR });
       Cookies.remove('cartItems');
       router.push(`/order/${data}`);
     } catch (error) {

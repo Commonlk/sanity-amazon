@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import Cookies from 'js-cookie';
-import classes from '../utils/classes';
+import { useRouter } from 'next/router';
 import {
   AppBar,
   Badge,
@@ -19,8 +19,10 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+
 import { Store } from '../utils/store';
-import { useRouter } from 'next/router';
+import classes from '../utils/classes';
+import dynamic from 'next/dynamic';
 
 interface Props {
   title?: string;
@@ -71,7 +73,7 @@ const Layout = ({ title, description, children }: Props) => {
   const darkModeChangeHandler = () => {
     dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
     const newDarkMode = !darkMode;
-    Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF');
+    Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF', { sameSite: 'Strict' });
   };
 
   const loginMenuCloseHandler = (
@@ -105,14 +107,14 @@ const Layout = ({ title, description, children }: Props) => {
     <>
       <Head>
         <title>{title ? `${title} - Sanity Amazon` : 'Sanity Amazon'}</title>
-        {description && <meta name='description' content={description}></meta>}
+        {description && <meta name="description" content={description}></meta>}
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppBar position='static' sx={classes.appbar}>
+        <AppBar position="static" sx={classes.appbar}>
           <Toolbar sx={classes.toolbar}>
-            <Box display='flex' alignItems='center'>
-              <NextLink href='/' passHref>
+            <Box display="flex" alignItems="center">
+              <NextLink href="/" passHref>
                 <Link>
                   <Typography sx={classes.brand}>Amazon</Typography>
                 </Link>
@@ -120,12 +122,12 @@ const Layout = ({ title, description, children }: Props) => {
             </Box>
             <Box>
               <Switch checked={darkMode} onChange={darkModeChangeHandler} />
-              <NextLink href='/cart' passHref>
+              <NextLink href="/cart" passHref>
                 <Link>
-                  <Typography component='span'>
+                  <Typography component="span">
                     {cart.cartItems.length > 0 ? (
                       <Badge
-                        color='secondary'
+                        color="secondary"
                         badgeContent={cart.cartItems.length}
                       >
                         Cart
@@ -139,15 +141,15 @@ const Layout = ({ title, description, children }: Props) => {
               {userInfo ? (
                 <>
                   <Button
-                    aria-controls='simple-menu'
-                    aria-haspopup='true'
+                    aria-controls="simple-menu"
+                    aria-haspopup="true"
                     sx={classes.navbarButton}
                     onClick={loginClickHandler}
                   >
                     {userInfo.name}
                   </Button>
                   <Menu
-                    id='simple-menu'
+                    id="simple-menu"
                     anchorEl={anchorEl}
                     keepMounted
                     open={Boolean(anchorEl)}
@@ -162,17 +164,17 @@ const Layout = ({ title, description, children }: Props) => {
                   </Menu>
                 </>
               ) : (
-                <NextLink href='/login' passHref>
+                <NextLink href="/login" passHref>
                   <Link>Login</Link>
                 </NextLink>
               )}
             </Box>
           </Toolbar>
         </AppBar>
-        <Container component='main' sx={classes.main}>
+        <Container component="main" sx={classes.main}>
           {children}
         </Container>
-        <Box component='footer' sx={classes.footer}>
+        <Box component="footer" sx={classes.footer}>
           <Typography>All rights reserved. Sanity Amazon</Typography>
         </Box>
       </ThemeProvider>
@@ -180,4 +182,5 @@ const Layout = ({ title, description, children }: Props) => {
   );
 };
 
-export default Layout;
+// export default Layout;
+export default dynamic(() => Promise.resolve(Layout), { ssr: false });

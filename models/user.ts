@@ -1,7 +1,7 @@
-export default interface IUser {
+export default interface User {
   _id: string;
   name: string;
   email: string;
   isAdmin: boolean;
-  token: string;
+  token?: string;
 }

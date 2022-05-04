@@ -1,11 +1,11 @@
-import { GetServerSideProps } from 'next';
-import Layout from '../../components/Layout';
+import React, { useContext } from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import IProduct from '../../models/product';
 import axios from 'axios';
-import client from '../../utils/client';
-import classes from '../../utils/classes';
+import { useSnackbar } from 'notistack';
+import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
+import { ServerError } from '@sanity/client';
 import {
   Alert,
   Button,
@@ -18,18 +18,20 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { useContext } from 'react';
+
+import Layout from '../../components/Layout';
+import IProduct from '../../models/product';
+import client from '../../utils/client';
+import classes from '../../utils/classes';
 import { urlFor, urlForThumbnail } from '../../utils/image';
-import { Store } from '../../utils/store';
-import { useSnackbar } from 'notistack';
-import { useRouter } from 'next/router';
+import { ActionType, Store } from '../../utils/store';
 
 const ProductScreen = ({
   product,
   error,
 }: {
   product: IProduct;
-  error: any;
+  error: ServerError;
 }) => {
   const router = useRouter();
   const {
@@ -52,7 +54,7 @@ const ProductScreen = ({
     }
 
     dispatch({
-      type: 'CART_ADD_ITEM',
+      type: ActionType.CART_ADD_ITEM,
       payload: {
         _key: product?._id,
         name: product?.name,
@@ -74,11 +76,11 @@ const ProductScreen = ({
   return (
     <Layout title={product?.title}>
       {error ? (
-        <Alert severity='error'>{error}</Alert>
+        <Alert severity="error">{error.message}</Alert>
       ) : (
         <Box>
           <Box sx={classes.section}>
-            <NextLink href='/' passHref>
+            <NextLink href="/" passHref>
               <Link>
                 <Typography>back to result</Typography>
               </Link>
@@ -89,7 +91,7 @@ const ProductScreen = ({
               <Image
                 src={urlFor(product?.image)}
                 alt={product?.name}
-                layout='responsive'
+                layout="responsive"
                 width={340}
                 height={340}
               />
@@ -97,7 +99,7 @@ const ProductScreen = ({
             <Grid item md={3} xs={12}>
               <List>
                 <ListItem>
-                  <Typography component='h1' variant='h1'>
+                  <Typography component="h1" variant="h1">
                     {product?.name}
                   </Typography>
                 </ListItem>
@@ -112,7 +114,7 @@ const ProductScreen = ({
                 <ListItem>
                   <Typography>
                     Description:{' '}
-                    {product!.description.length > 256
+                    {product?.description.length > 256
                       ? product?.description.slice(0, 256)
                       : product?.description}
                   </Typography>
@@ -139,7 +141,7 @@ const ProductScreen = ({
                       </Grid>
                       <Grid item xs={6}>
                         <Typography>
-                          {product!.countInStock > 0
+                          {product?.countInStock > 0
                             ? 'In stock'
                             : 'Unavailable'}
                         </Typography>
@@ -150,7 +152,7 @@ const ProductScreen = ({
                     <Button
                       onClick={addToCartHandler}
                       fullWidth
-                      variant='contained'
+                      variant="contained"
                     >
                       Add to cart
                     </Button>
@@ -178,7 +180,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
       return {
         props: { product },
       };
-    } catch (error: any) {
+    } catch (error) {
       return {
         props: { error },
       };

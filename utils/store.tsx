@@ -1,23 +1,42 @@
 import React, { createContext, Dispatch, useReducer } from 'react';
+import Cookies from 'js-cookie';
+
 import ShippingAddress from '../models/shippingAddress';
 import CartItem from '../models/cartItem';
-import Cookies from 'js-cookie';
-import IUser from '../models/user';
+import User from '../models/user';
 
 interface State {
   darkMode: boolean;
   cart: {
     cartItems: CartItem[];
-    shippingAddress: ShippingAddress;
-    paymentMethod: string;
+    shippingAddress: ShippingAddress | null;
+    paymentMethod: string | undefined;
   };
-  userInfo: IUser | null;
+  userInfo: User | null;
 }
 
-interface Action {
-  type: string;
-  payload?: any;
+export enum ActionType {
+  DARK_MODE_ON,
+  DARK_MODE_OFF,
+  CART_ADD_ITEM,
+  CART_REMOVE_ITEM,
+  CART_CLEAR,
+  USER_LOGIN,
+  USER_LOGOUT,
+  SAVE_SHIPPING_ADDRESS,
+  SAVE_PAYMENT_METHOD,
 }
+
+type Action =
+  | { type: ActionType.DARK_MODE_ON }
+  | { type: ActionType.DARK_MODE_OFF }
+  | { type: ActionType.CART_ADD_ITEM; payload: CartItem }
+  | { type: ActionType.CART_REMOVE_ITEM; payload: CartItem }
+  | { type: ActionType.CART_CLEAR }
+  | { type: ActionType.USER_LOGIN; payload: User }
+  | { type: ActionType.USER_LOGOUT }
+  | { type: ActionType.SAVE_SHIPPING_ADDRESS; payload: ShippingAddress }
+  | { type: ActionType.SAVE_PAYMENT_METHOD; payload: string };
 
 interface StateContext {
   state: State;
@@ -28,33 +47,33 @@ const initialState: State = {
   darkMode: Cookies.get('darkMode') === 'ON' ? true : false,
   cart: {
     cartItems: Cookies.get('cartItems')
-      ? JSON.parse(Cookies.get('cartItems')!)
+      ? JSON.parse(Cookies.get('cartItems') || '')
       : [],
     shippingAddress: Cookies.get('shippingAddress')
-      ? JSON.parse(Cookies.get('shippingAddress')!)
+      ? JSON.parse(Cookies.get('shippingAddress') || '')
       : {},
     paymentMethod: Cookies.get('paymentMethod')
-      ? Cookies.get('paymentMethod')!
+      ? Cookies.get('paymentMethod')
       : '',
   },
   userInfo: Cookies.get('userInfo')
-    ? JSON.parse(Cookies.get('userInfo')!)
+    ? JSON.parse(Cookies.get('userInfo') || '')
     : null,
 };
 
 export const Store = createContext<StateContext>({
-  // eslint-disable-next-line no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   dispatch: (action: Action) => undefined,
   state: initialState,
 });
 
-const reducer = (state: State, action: Action) => {
+const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'DARK_MODE_ON':
+    case ActionType.DARK_MODE_ON:
       return { ...state, darkMode: true };
-    case 'DARK_MODE_OFF':
+    case ActionType.DARK_MODE_OFF:
       return { ...state, darkMode: false };
-    case 'CART_ADD_ITEM': {
+    case ActionType.CART_ADD_ITEM: {
       const newItem = action.payload;
       const existItem = state.cart.cartItems.find(
         item => item._key === newItem._key
@@ -64,33 +83,37 @@ const reducer = (state: State, action: Action) => {
             item._key === existItem._key ? newItem : item
           )
         : [...state.cart.cartItems, newItem];
-      Cookies.set('cartItems', JSON.stringify(cartItems));
+      Cookies.set('cartItems', JSON.stringify(cartItems), {
+        sameSite: 'Strict',
+      });
       return { ...state, cart: { ...state.cart, cartItems } };
     }
-    case 'CART_REMOVE_ITEM': {
+    case ActionType.CART_REMOVE_ITEM: {
       const cartItems = state.cart.cartItems.filter(
         item => item._key !== action.payload._key
       );
-      Cookies.set('cartItems', JSON.stringify(cartItems));
+      Cookies.set('cartItems', JSON.stringify(cartItems), {
+        sameSite: 'Strict',
+      });
       return { ...state, cart: { ...state.cart, cartItems } };
     }
-    case 'CART_CLEAR':
+    case ActionType.CART_CLEAR:
       return {
         ...state,
         cart: { ...state.cart, cartItems: [] },
       };
-    case 'USER_LOGIN':
+    case ActionType.USER_LOGIN:
       return {
         ...state,
         userInfo: action.payload,
       };
-    case 'USER_LOGOUT':
+    case ActionType.USER_LOGOUT:
       return {
         ...state,
         userInfo: null,
-        cart: { cartItems: [], shippingAddress: {}, paymentMethod: '' },
+        cart: { cartItems: [], shippingAddress: null, paymentMethod: '' },
       };
-    case 'SAVE_SHIPPING_ADDRESS':
+    case ActionType.SAVE_SHIPPING_ADDRESS:
       return {
         ...state,
         cart: {
@@ -98,7 +121,7 @@ const reducer = (state: State, action: Action) => {
           shippingAddress: action.payload,
         },
       };
-    case 'SAVE_PAYMENT_METHOD':
+    case ActionType.SAVE_PAYMENT_METHOD:
       return {
         ...state,
         cart: {
