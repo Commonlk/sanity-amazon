@@ -20,9 +20,9 @@ import {
   Typography,
 } from '@mui/material';
 
-import { Store } from '../utils/store';
 import classes from '../utils/classes';
 import dynamic from 'next/dynamic';
+import { ActionType, Store } from '../utils/store';
 
 interface Props {
   title?: string;
@@ -71,7 +71,9 @@ const Layout = ({ title, description, children }: Props) => {
   });
 
   const darkModeChangeHandler = () => {
-    dispatch({ type: darkMode ? 'DARK_MODE_OFF' : 'DARK_MODE_ON' });
+    dispatch({
+      type: darkMode ? ActionType.DARK_MODE_OFF : ActionType.DARK_MODE_ON,
+    });
     const newDarkMode = !darkMode;
     Cookies.set('darkMode', newDarkMode ? 'ON' : 'OFF', { sameSite: 'Strict' });
   };
@@ -95,7 +97,7 @@ const Layout = ({ title, description, children }: Props) => {
 
   const logoutClickHandler = () => {
     setAnchorEl(null);
-    dispatch({ type: 'USER_LOGOUT' });
+    dispatch({ type: ActionType.USER_LOGOUT });
     Cookies.remove('userInfo');
     Cookies.remove('cartItems');
     Cookies.remove('shippingAddress');
