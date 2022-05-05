@@ -10,6 +10,7 @@ export default interface Order {
   taxPrice: number;
   shippingPrice: number;
   totalPrice: number;
+  createdAt: string;
   paidAt: Date;
   deliveredAt: Date;
   isPaid: boolean;
