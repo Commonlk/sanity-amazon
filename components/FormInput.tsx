@@ -1,13 +1,21 @@
-import { InputBaseComponentProps, TextField } from '@mui/material';
 import React from 'react';
-import { Controller, UseControllerProps } from 'react-hook-form';
+import { InputBaseComponentProps, TextField } from '@mui/material';
+import {
+  Control,
+  Controller,
+  FieldValues,
+  RegisterOptions,
+} from 'react-hook-form';
 
 interface Props {
   name: string;
   label: string;
-  control: any;
+  control: Control<FieldValues, unknown>;
   error: boolean;
-  rules?: UseControllerProps;
+  rules?: Omit<
+    RegisterOptions<FieldValues, string>,
+    'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'disabled'
+  >;
   inputProps: InputBaseComponentProps;
   helperText: React.ReactNode;
 }
@@ -25,11 +33,11 @@ const FormInput = ({
     <Controller
       name={name}
       control={control}
-      defaultValue=''
+      defaultValue=""
       rules={rules}
       render={({ field }) => (
         <TextField
-          variant='outlined'
+          variant="outlined"
           fullWidth
           id={name}
           label={label}
