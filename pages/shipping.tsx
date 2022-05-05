@@ -2,8 +2,8 @@ import React, { useContext, useEffect } from 'react';
 import CheckoutWizard from '../components/CheckoutWizard';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
-import { Controller, FieldValues, useForm } from 'react-hook-form';
-import { Button, List, ListItem, TextField, Typography } from '@mui/material';
+import { FieldValues, useForm } from 'react-hook-form';
+import { Button, List, ListItem, Typography } from '@mui/material';
 
 import Layout from '../components/Layout';
 import FormInput from '../components/FormInput';
@@ -72,37 +72,32 @@ const ShippingScreen = () => {
         </Typography>
         <List>
           <ListItem>
-            <Controller
+            <FormInput
               name="fullName"
               control={control}
-              defaultValue=""
               rules={{
                 required: true,
                 minLength: 2,
               }}
-              render={({ field }) => (
-                <TextField
-                  variant="outlined"
-                  fullWidth
-                  id="fullName"
-                  label="Full Name"
-                  inputProps={{ type: 'fullName' }}
-                  error={Boolean(errors.fullName)}
-                  helperText={
-                    errors.fullName
-                      ? errors.fullName.type === 'minLength'
-                        ? 'Full Name length is more than 1'
-                        : 'Full Name is required'
-                      : ''
-                  }
-                  {...field}
-                />
-              )}
+              label="Full Name"
+              inputProps={{ type: 'fullName' }}
+              error={Boolean(errors.fullName)}
+              helperText={
+                errors.fullName
+                  ? errors.fullName.type === 'minLength'
+                    ? 'Full Name length is more than 1'
+                    : 'Full Name is required'
+                  : ''
+              }
             />
           </ListItem>
           <ListItem>
             <FormInput
               control={control}
+              rules={{
+                required: true,
+                minLength: 2,
+              }}
               name="address"
               label="Address"
               inputProps={{ type: 'address' }}
@@ -119,6 +114,10 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
+              rules={{
+                required: true,
+                minLength: 2,
+              }}
               name="city"
               label="City"
               inputProps={{ type: 'city' }}
@@ -135,6 +134,10 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
+              rules={{
+                required: true,
+                minLength: 2,
+              }}
               name="postalCode"
               label="Postal Code"
               inputProps={{ type: 'postalCode' }}
@@ -151,6 +154,10 @@ const ShippingScreen = () => {
           <ListItem>
             <FormInput
               control={control}
+              rules={{
+                required: true,
+                minLength: 2,
+              }}
               name="country"
               label="Country"
               inputProps={{ type: 'country' }}
